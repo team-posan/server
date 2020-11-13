@@ -11,10 +11,10 @@ const dataAdmin = {
 
 describe('Testing Login Admin Success', ()=>{
     test('Success Login',(done)=>{
+        console.log('success login', dataAdmin)
         request(app)
-        .post('/login')
+        .post('/user/login')
         .send(dataAdmin)
-        .set('Accept', 'application/json')
         .then(response =>{ 
             const { status , body } = response
             expect(status).toBe(201)
@@ -28,21 +28,21 @@ describe('Testing Login Admin Success', ()=>{
 describe('Testing Login Admin Fail', ()=>{
     test('Login Username not found', (done)=>{
         let usernameNotFound = {...dataAdmin, username:'adminsalah'}
-        equest(app)
-        .post('/login')
+        request(app)
+        .post('/user/login')
         .send(usernameNotFound)
         .set('Accept', 'application/json')
         .then(response =>{ 
             const { status , body } = response
             expect(status).toBe(404)
-            expect(body).toHaveProperty('message', "Email Not Found !")
+            expect(body).toHaveProperty('message', "Username Not Found")
             done()
         })
     })
     test('Login Password Wrong', (done)=>{
         let passwordWrong = {...dataAdmin, password:'adminsalah'}
-        equest(app)
-        .post('/login')
+        request(app)
+        .post('/user/login')
         .send(passwordWrong)
         .set('Accept', 'application/json')
         .then(response =>{ 
@@ -54,27 +54,27 @@ describe('Testing Login Admin Fail', ()=>{
     })
     test('Login Username Empty', (done)=>{
         let usernameEmpty = {...dataAdmin, username:''}
-        equest(app)
-        .post('/login')
+        request(app)
+        .post('/user/login')
         .send(usernameEmpty)
         .set('Accept', 'application/json')
         .then(response =>{ 
             const { status , body } = response
             expect(status).toBe(404)
-            expect(body).toHaveProperty('message', "Username cannot be empty")
+            expect(body).toHaveProperty('message', "Username/Password Cannot be empty")
             done()
         })
     })
     test('Login Password Empty', (done)=>{
         let passwordEmpty = {...dataAdmin, username:''}
-        equest(app)
-        .post('/login')
+        request(app)
+        .post('/user/login')
         .send(passwordEmpty)
         .set('Accept', 'application/json')
         .then(response =>{ 
             const { status , body } = response
             expect(status).toBe(404)
-            expect(body).toHaveProperty('message', "Password cannot be empty")
+            expect(body).toHaveProperty('message', "Username/Password Cannot be empty")
             done()
         })
     })
