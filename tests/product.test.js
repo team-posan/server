@@ -3,72 +3,42 @@
  * @Cassier Case
  * @Admin case
  * 
- * @product case
- * 
- * @Transaction (cart)
-    * Add - success fail
-    * Delete - success fail
-    * Update - success fail
-    * Read - success fail
+ * @product
  * 
  */
 
 
+const { signToken } = require('../helpers/jwt')
 const request = require("supertest");
 const app     = require("../app.js");
-
 let tokenAdmin // di assign di auth user
 
-// describe("Auth Customer", () => {
-//    test('Success register ', () => {
-//       request(app)
-//             .post("/user/register")
-//             .send({
-//                username: username,
-//                phone_number: phone_number
-//             })
-//             .set("Accept", "aplication/json")
-//             .then(response => {
-//                 const {status, body} = response
-//                 expect(status).toBe(201)
-//                 expect(body).toHaveProperty('username', expect.any(String))
-//                 expect(body).toHaveProperty('status', expect.any(String))
-//                 expect(body).toHaveProperty('phone_number', expect.any(String))
-//                 done()
-//             })
-//    })
-
-//    test('fail register', () => {
-//       request(app)
-//             .post("/user/register")
-//             .send({
-//                username: username,
-//                phone_number: phone_number
-//             })
-//             .set("Accept", "aplication/json")
-//             .then(response => {
-//                 const {status, body} = response
-//                 expect(status).toBe(403)
-//                 expect(body).toHaveProperty('message', expect.any(String))
-//                 done()
-//             })
-//    })
-// })
-
 let idProduct;
+
+// * Access token Dari sini
+beforeAll (done => {
+    User.findOne({
+        where: {
+            email: 'admin@mail.com'
+        }
+    }).then (result => {
+        access_token = signToken(result.id, result.email, result.role);
+        done()
+    })
+}, 5000)
+
+let productInput = {
+    product_name: '',
+    price: '',
+    image_url: '',
+    stock: '',
+    storeId: '',
+    product_number: ''   // ? tambahan buat barcode product kalau ada
+ }
 
 describe("Product Add data", () => {
    let header = {
       access_token: tokenAdmin
-   }
-
-   let productInput = {
-      product_name: '',
-      price: '',
-      image_url: '',
-      stock: '',
-      storeId: '',
-      product_number: ''   // ? tambahan buat barcode product kalau ada
    }
 
    test('Add product', () => {
@@ -105,16 +75,84 @@ describe("Product Add data", () => {
   })
 })
 
+describe("Product - Admin and User Case Fetch", () => {
+    // @note Success - Fetch All Data
+    test("Success: Fetch All Data Product", done => {
+        request(app)
+            .get('/products')
+            .set('access_token', access_token)
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(200)
+                expect(body[0]).toHaveProperty('product_number', expect.any(Number)) // ? ditambah disini
+                expect(body[0]).toHaveProperty('product_name', expect.any(String))
+                expect(body[0]).toHaveProperty('price', expect.any(String))
+                expect(body[0]).toHaveProperty('image_url', expect.any(String))
+                expect(body[0]).toHaveProperty('stock', expect.any(String))
+                expect(body[0]).toHaveProperty('storeId', expect.any(Number))
+                done()
+            })
+    })
+    // @note Success - Fetch One Data
+    test("Success: Fetch One Data", done => {
+        request(app)
+            .get('/products/' + idProduct)
+            .set('access_token', access_token)
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(200)
+                expect(body).toHaveProperty('product_number', expect.any(Number)) // ? ditambah disini
+                expect(body).toHaveProperty('product_name', expect.any(String))
+                expect(body).toHaveProperty('price', expect.any(String))
+                expect(body).toHaveProperty('image_url', expect.any(String))
+                expect(body).toHaveProperty('stock', expect.any(String))
+                expect(body).toHaveProperty('storeId', expect.any(Number))
+                done()
+            })
+    })
+    // @note Failed - Fetch All Data
+    test('Failed: Fetch All Data but not Authorized', done => {
+        request(app)
+            .get('/products')
+            .set('access_token', 'not_real_access_token')
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(401)
+                expect(body).toHaveProperty('message', 'You dont have acces to this operation')
+
+                done()
+            })
+    })
+    // @note Failed - Fetch One Data
+    test('Failed: Fetch One Data but not Authorized', done => {
+        request(app)
+            .get('/products/1')
+            .set('access_token', 'not_real_access_token')
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(401)
+                expect(body).toHaveProperty('message', 'You dont have acces to this operation')
+
+                done()
+            })
+    })
+    test('Failed: Fetch One Data but product not found', done => {
+        request(app)
+            .get('/products/1002')
+            .set('access_token', access_token)
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(404)
+                expect(body).toHaveProperty('message', 'Not Found!')
+
+                done()
+            })
+    })
+})
+
+
 describe("Product - Admin Case Update Data", () => {
    // @note Success - Update Data
-
-   let productUpdateInput = {
-      product_name: '',
-      price: '',
-      image_url: '',
-      stock: '',
-      storeId: ''
-   }
 
    test("Success: Edit/Update One Data", done => {
        request(app)
@@ -151,7 +189,7 @@ describe("Product - Admin Case Update Data", () => {
            })
    })
 
-   test("Failed: Edit/Update One Data but field input (name, price, stock) set to empty value", done => {
+   test("Failed: Edit/Update One Data but field input (product_name, price, stock) set to empty value", done => {
        request(app)
            .put('/products/' + idProduct)
            .set('access_token', access_token)
@@ -182,4 +220,52 @@ describe("Product - Admin Case Update Data", () => {
             done()
          })
    })
+})
+
+
+describe("Product - Admin Case Delete Data", () => {
+    // @note Success - Delete Data
+    test("Success: Delete One Data", done => {
+        request(app)
+            .delete('/products/' + idProduct)
+            .set('access_token', access_token)
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(200)
+                expect(body).toHaveProperty('message', 'Product: success deleted')
+
+                done()
+            })
+    })
+    // @note Failed - Delete Data
+    test("Failed: Delete One Data but role didn't have authorization", done => {
+        request(app)
+            .delete('/products/' + idProduct)
+            .set('access_token', 'wr0n6_acc33ss_t0k3n')
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(401)
+                expect(body).toHaveProperty('message', 'You dont have acces to this operation')
+
+                done()
+            })
+    })
+    test("Failed: Delete One Data but Data Not Found", done => {
+        request(app)
+            .delete('/products/1002')
+            .set('access_token', access_token)
+            .then(response => {
+                const {status, body} = response
+                expect(status).toBe(404)
+                expect(body).toHaveProperty('message', 'Not Found!')
+
+                done()
+            })
+    })
+})
+
+// * @remind Untuk Memnbersihkan semua data di table database setelah test selesai
+afterAll(done => {
+    queryInterface.bulkDelete('Products', null, {});
+    done()
 })
