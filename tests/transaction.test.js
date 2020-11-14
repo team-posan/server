@@ -8,11 +8,13 @@ const { User } = require('../models')
 let id = 1;
 var access_token_admin
 var access_token_kasir
+var access
 beforeAll(async (done)=>{
   const admin = await User.findOne({where:{username:'admin'}})
   const kasir = await User.findOne({where:{username:'kasirjakarta'}})
   access_token_admin = signToken({id:admin.id,username:admin.username,role:admin.role,StoreId:admin.StoreId})
   access_token_kasir = signToken({id:kasir.id,username:kasir.username,role:kasir.role,StoreId:kasir.StoreId})
+  access = signToken({phone_number:'123456789', role:'customer', id:14})
   done()
 })
 
@@ -39,7 +41,7 @@ describe("test POST carts", () => {
         carts: [inputCartsSuccess]
       })
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access", access)
       .then((response) => {
         const { status, body } = response;
         // console.log('>>>>>', body);
@@ -73,7 +75,7 @@ describe("Test GET carts", () => {
     request(app)
       .get("/carts")
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access", access)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
@@ -103,7 +105,7 @@ describe("TEST UPDATE carts", () => {
       .put(`/carts/${id}`)
       .send(inputCartsSuccess)
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access", access)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);

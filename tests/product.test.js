@@ -71,6 +71,7 @@ beforeAll(async (done)=>{
    const kasir = await User.findOne({where:{username:'kasirjakarta'}})
    access_token_admin = signToken({id:admin.id,username:admin.username,role:admin.role,StoreId:admin.StoreId})
    access_token_kasir = signToken({id:kasir.id,username:kasir.username,role:kasir.role,StoreId:kasir.StoreId})
+   access = signToken({phone_number:'123456789', role:'customer', id:14})
    done()
 })
 
@@ -115,11 +116,11 @@ describe('Testing Fetch Product',()=>{
             })
    })
 
-   test.only('Fetch Product - Customer',(done)=>{
+   test('Fetch Product - Customer',(done)=>{
       request(app)
-      .get("/product")
+      .get("/product?store=1")
       .set("Accept", "application/json")
-      .set("access", access_token_kasir)
+      .set("access", access)
       .then((response) => {
           const { status, body } = response;
           expect(status).toBe(200);
@@ -128,6 +129,19 @@ describe('Testing Fetch Product',()=>{
           done();
       })
    })
+
+   // test('Fetch Product - Failed malformed jwt',(done)=>{
+   //    request(app)
+   //    .get("/product?store=1")
+   //    .set("Accept", "application/json")
+   //    .set("access_token", '123')
+   //    .then((response) => {
+   //        const { status, body } = response;
+   //        expect(status).toBe(500);
+   //       //  expect(body).toHaveProperty('err', expect.any(String));
+   //        done();
+   //    })
+   // })
 
 })
 
@@ -155,7 +169,7 @@ describe('Testing Add Product', ()=>{
   })
   
   describe('Testing Add Product Failed', ()=>{
-     test('Failed Add Product - Unauthorized', (done)=>{
+     test('Failed Add Product - Unauthorized no token', (done)=>{
         request(app)
          .post('/product')
          //  .set('access_token', 'fail-access-token')
@@ -167,6 +181,19 @@ describe('Testing Add Product', ()=>{
                done()
          })
      })
+
+     test('Failed Add Product - Unauthorized kasir tried to add', (done)=>{
+      request(app)
+       .post('/product')
+        .set('access_token', access_token_kasir)
+       .send(productInput)
+       .then(response => {
+             const {status, body} = response
+             expect(status).toBe(401)
+             expect(body).toHaveProperty('message', expect.any(String))
+             done()
+       })
+   })
   })
 })
 
@@ -196,14 +223,28 @@ describe('Testing Edit Product', ()=>{
    })
 
    describe('Testing Edit Product Failed', ()=>{
-      test('Failed Edit Product - Unauthorized', (done)=>{
+      test('Failed Edit Product - Unauthorized no token', (done)=>{
          request(app)
-         .patch('/product')
+         .patch('/product/1')
          //  .set('access_token', 'fail-access-token')
          .send(productUpdateInput)
          .then(response => {
                const {status, body} = response
                expect(status).toBe(404)
+               expect(body).toHaveProperty('message', expect.any(String))
+               done()
+         })
+      })
+
+      test('Failed Edit Product - Unauthorized kasir tried to edit product', (done)=>{
+         request(app)
+         .patch('/product/1')
+          .set('access_token', access_token_kasir)
+         .send(productUpdateInput)
+         .then(response => {
+               const {status, body} = response
+               console.log(body)
+               expect(status).toBe(401)
                expect(body).toHaveProperty('message', expect.any(String))
                done()
          })
@@ -240,6 +281,34 @@ describe('Testing Edit Product', ()=>{
       })
       
    })
+})
+
+
+describe('Testing Delete Product', ()=>{
+   test('Success Delete Product', (done)=>{
+      request(app)
+      .delete('/product/' + idProduct)
+      .set('access_token', access_token_admin)
+      .then(response => {
+         const {status, body} = response
+         expect(status).toBe(201)
+         expect(body).toHaveProperty('message', expect.any(String))
+         done()
+      })
+   })
+
+   test('Failed Delete Product - Kasir tried to delete product', (done)=>{
+      request(app)
+      .delete('/product/' + idProduct)
+      .set('access_token', access_token_kasir)
+      .then(response => {
+         const {status, body} = response
+         expect(status).toBe(401)
+         expect(body).toHaveProperty('message', expect.any(String))
+         done()
+      })
+   })
+  
 })
 
 
