@@ -32,10 +32,12 @@ class UserController {
         try {
             const checkCustomer = await User.findOne({where:{phone_number}})
             if(!checkCustomer){
-                 let createCustomer = await  User.create({phone_number,role:'customer'})
-                 return res.status(201).json({access:'customer', message:'new customer', data:createCustomer})
+                let createCustomer = await  User.create({phone_number,role:'customer'})
+                const access = signToken({role:'customer',id:+createCustomer.id})
+                 return res.status(201).json({access})
             }else {
-                return res.status(201).json({access:'customer', message:'return customer'})
+                const access = signToken({role:'customer',id:+checkCustomer.id})
+                return res.status(201).json({access})
             }
         } catch (error) {
             console.log(error)
