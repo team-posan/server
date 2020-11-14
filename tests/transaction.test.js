@@ -5,6 +5,10 @@ const { queryInterface } = sequelize;
 const { signToken } = require("../helpers/jwt.js");
 const { User } = require('../models')
 
+// let id = 1;
+// var access_token_admin
+// var access_token_kasir
+// var access
 let id
 let id2
 let id3
@@ -16,7 +20,8 @@ beforeAll(async (done)=>{
   const kasir = await User.findOne({where:{username:'kasirjakarta'}})
   access_token_customer = signToken({id:customer.id,role:customer.role, phone_number: customer.phone_number})
   access_token_kasir = signToken({id:kasir.id,username:kasir.username,role:kasir.role,StoreId:kasir.StoreId})
-  console.log('akses token', access_token_customer, access_token_kasir)
+//   access = signToken({phone_number:'123456789', role:'customer', id:14})
+//   console.log('akses token', access_token_customer, access_token_kasir)
   done()
 })
 
@@ -43,6 +48,7 @@ describe("test POST carts", () => {
         carts: [inputCartsSuccess, inputCartsSuccess, inputCartsSuccess]
       })
       .set("Accept", "application/json")
+//       .set("access", access)
       .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
@@ -88,6 +94,7 @@ describe("Test GET carts", () => {
     request(app)
       .get("/carts")
       .set("Accept", "application/json")
+//       .set("access", access)
       .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
@@ -143,6 +150,7 @@ describe("TEST UPDATE carts", () => {
       .put(`/carts/${id}`)
       .send(inputCartsSuccess)
       .set("Accept", "application/json")
+//       .set("access", access)
       .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;

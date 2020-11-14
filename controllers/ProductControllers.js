@@ -9,10 +9,10 @@ class ProductController {
                 order:[['id','asc'],['StoreId','asc']]
             })
                 .then(result=>{
-                    res.status(200).json(result)
+                    return res.status(200).json(result)
                 })
                 .catch(err=>{
-                    res.status(500).json({err})
+                    return res.status(500).json({err})
                 })
         }else if(role === 'kasir'){
             Product.findAll({
@@ -20,10 +20,10 @@ class ProductController {
                 order:[['id','asc'],['StoreId','asc']]
             })
                 .then(result=>{
-                    res.status(200).json(result)
+                    return res.status(200).json(result)
                 })
                 .catch(err=>{
-                    res.status(500).json({err})
+                    return res.status(500).json({err})
                 })
         }else{
             Product.findAll({
@@ -31,11 +31,10 @@ class ProductController {
                 order:[['id','asc'],['StoreId','asc']]
             })
                 .then(result=>{
-                    res.status(200).json(result)
+                    return res.status(200).json(result)
                 })
                 .catch(err=>{
-                    console.log(err)
-                    res.status(500).json({err})
+                    return res.status(500).json({err})
                 })
         }
     }

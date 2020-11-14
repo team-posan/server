@@ -4,7 +4,7 @@
   "description": "Server",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose false --forceExit",
+    "test": "jest --detectOpenHandles --verbose false --forceExit --coverage",
     "start": "nodemon ./bin/www"
   },
   "repository": {

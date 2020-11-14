@@ -5,6 +5,7 @@ const Authentication=(req,res,next)=>{
     let decoded
     
     if(req.headers.access_token){
+//         decoded = verifyToken(req.headers.access_token)
         console.log('headers.access_token')
         // ! untuk mengatasi kalo akses token gak resmi
         try {
@@ -32,7 +33,7 @@ const Authentication=(req,res,next)=>{
     }else{
         res.status(404).json({message:'Login needed'})
     }
-    console.log('+++++', decoded)
+//     console.log('+++++', decoded)
     // User.findOne({where:{username:decoded.username}})
     User.findOne({where:{id: +decoded.id}})
         .then(user=>{

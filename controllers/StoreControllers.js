@@ -2,16 +2,12 @@ const { Store } = require('../models')
 
 class StoreController{
     static async getStoreHandler(req,res,next){
-        const { role } = req.userData
         try {
-            if(role === 'admin'){
-                const allStore = await Store.findAll({
-                    order:[['id','asc']]
-                })
-                return res.status(200).json(allStore)
-            }else{
-                return res.status(401).json({message:'not authorized to see all store'})
-            }
+            const allStore = await Store.findAll({
+                order:[['id','asc']]
+            })
+            return res.status(200).json(allStore)
+
         } catch (error) {
             return res.status(500).json({error})
         }
@@ -48,7 +44,7 @@ class StoreController{
         try {
             if(role === 'admin'){
                 const updateStore = await Store.update(editedStore,{where:{id}})
-                return res.status(201).json(updateStore)
+                return res.status(201).json({updateStore,message:'Success Edit'})
             }else{
                 return res.status(401).json({message:'not authorized to edit store'})
 

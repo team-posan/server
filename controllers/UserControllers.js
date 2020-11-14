@@ -65,7 +65,6 @@ class UserController {
 
             }
         } catch (error) {
-            console.log(error)
             return res.status(500).json({error:error.response})
         }
     }
@@ -83,12 +82,11 @@ class UserController {
         try {
             if(roleReqData.role === 'admin'){
                 const updateKasir = await User.update(editedKasir, {where:{id}})
-                return res.status(201).json(updateKasir)
+                return res.status(201).json({updateKasir,message:'success edit'})
             }else{
                 return res.status(401).json({message:'not authorized to edit kasir'})
             }
         } catch (error) {
-            console.log(error)
             return res.status(500).json({error:error})
         }
     }
