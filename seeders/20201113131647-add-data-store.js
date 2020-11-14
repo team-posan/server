@@ -10,8 +10,8 @@ module.exports = {
         updatedAt:new Date()
       },
       {
-        store_name:'bandung',
-        store_address:'bandung raya no 1',
+        store_name:'bekasi',
+        store_address:'bekasi raya no 1',
         createdAt:new Date(),
         updatedAt:new Date()
       }

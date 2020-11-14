@@ -23,8 +23,6 @@ class CartController {
          res.status(200).json({
             carts: data
          })
-      }).catch(err => {
-         res.status(500).json(err)
       })
    }
 
@@ -79,7 +77,8 @@ class CartController {
       Cart.update({
          payment_status: req.body.payment_status
       }, {
-         where: {id: req.body.id}
+         // sendnya dataId = [id1, id2, id3]
+         where: req.body.dataId
       }).then((result) => {
          // console.log(result)
          res.status(200).json(result)
