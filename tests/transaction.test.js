@@ -4,7 +4,7 @@ const { sequelize } = require("../models");
 const { queryInterface } = sequelize;
 
 let id = 1;
-let access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEwIiwidXNlcm5hbWUiOiJKb2huIERvZSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTUxNjIzOTAyMn0.2Kuk87S4EV0lNsdPl5Kf5FGBtnnrh0e-QyNIJl9nrOo";
+let access_token = "08123456789";
 
 let inputCartsSuccess = {
   ProductId: 1,
@@ -18,27 +18,6 @@ let inputCartsFailed = {
   quantity: -1,
   payment_status: "unpayment",
 };
-
-// console.log(carts);
-
-// describe.only(`TEST BOONGAN`, () => {
-//   // cobacobaocba
-//   test("hayolah", () => {
-//     const user = {
-//       name: "Albar",
-//       gender: "male",
-//       status: "bingung",
-//     };
-//     expect(user).toHaveProperty("name", expect.any(String));
-//   });
-//   // null testing
-//   test("is Zero or not", () => {
-//     const zero = 0;
-//     expect(zero).not.toBe(null);
-//     expect(zero).toBeFalsy();
-//     expect(zero).not.toBeTruthy();
-//   });
-// });
 
 // CREATE
 describe("test POST carts", () => {
@@ -113,7 +92,7 @@ describe("TEST UPDATE carts", () => {
       .put(`/carts/${id}`)
       .send(inputCartsSuccess)
       .set("Accept", "application/json")
-      .set("access_token", access_token)
+      .set("access", access_token)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
@@ -140,7 +119,7 @@ describe("TEST UPDATE carts", () => {
     request(app)
       .put(`/carts/1000`)
       .set("Accept", "application/json")
-      .set("access_token", access_token)
+      .set("access", access_token)
       .send(inputCartsSuccess)
       .then((response) => {
         const { status, body } = response;
@@ -150,6 +129,104 @@ describe("TEST UPDATE carts", () => {
       });
   });
 });
+
+
+// EDIT PAYMENT ONLY
+describe("TEST UPDATE PAYMENT carts", () => {
+  let newPayment = {
+    payment_status: 'paid',
+    dataId: [1, 2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
+  }
+
+  test("success update carts", (done) => {
+    request(app)
+      .patch(`/carts`)
+      .send(newPayment)
+      .set("Accept", "application/json")
+      .set("access", access_token)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("message", "sucess updated payment");
+        done();
+      });
+  });
+
+  test("failed to update payment carts - invalid access token", (done) => {
+    request(app)
+      .put(`/carts/${id}`)
+      .send(inputCartsSuccess)
+      .set("Accept", "application/json")
+      .set("access", 'invalid access token')
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(401);
+        expect(body).toHaveProperty("message", "invalid access_token");
+        done();
+      });
+  });
+
+  test("failed to update payment carts - data not found", (done) => {
+    request(app)
+      .put(`/carts/1000`)
+      .set("Accept", "application/json")
+      .set("access", access_token)
+      .send(inputCartsSuccess)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(404);
+        expect(body).toHaveProperty("message", "data not found");
+        done();
+      });
+  });
+});
+
+
+// DELETE
+describe("TEST DELETE carts", () => {
+  test("success delete carts", (done) => {
+    request(app)
+      .delete(`/carts/${id}`)
+      .send(inputCartsSuccess)
+      .set("Accept", "application/json")
+      .set("access_token", access_token)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("message", "sucess deleted data");
+        done();
+      });
+  });
+
+  test("failed to delete carts - invalid number phone", (done) => {
+    request(app)
+      .delete(`/carts/${id}`)
+      .send(inputCartsSuccess)
+      .set("Accept", "application/json")
+      .set("access", 'invalid access token')
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(401);
+        expect(body).toHaveProperty("message", "invalid access_token");
+        done();
+      });
+  });
+
+  test("failed to delete carts - data not found", (done) => {
+    request(app)
+      .delete(`/carts/1000`)
+      .set("Accept", "application/json")
+      .set("access", access_token)
+      .send(inputCartsSuccess)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(404);
+        expect(body).toHaveProperty("message", "data not found");
+        done();
+      });
+  });
+});
+
 
 // afterAll((done) => {
 //   queryInterface

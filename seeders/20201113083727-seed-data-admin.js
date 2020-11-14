@@ -13,7 +13,7 @@ module.exports = {
       username:'kasirjakarta',
       password:hashPassword('admin'),
       role:'kasir',
-      StoreId:null,
+      StoreId:1,
       createdAt:new Date(),
       updatedAt:new Date()
     },
@@ -21,19 +21,19 @@ module.exports = {
       username:'kasirbekasi',
       password:hashPassword('admin'),
       role:'kasir',
-      StoreId:null,
+      StoreId:2,
       createdAt:new Date(),
       updatedAt:new Date()
     },
     {
       username:'Karina',
-      phone_number:123456789,
+      phone_number:'123456789',
       createdAt:new Date(),
       updatedAt:new Date()
     },
     {
       username:'Eggsy',
-      phone_number:987654321,
+      phone_number:'987654321',
       createdAt:new Date(),
       updatedAt:new Date()
     }
