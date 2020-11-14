@@ -9,8 +9,8 @@ const { Authentication } = require('../middlewares/Authentication')
 
 route.use('/user', UserRoute)
 route.use('/product', Authentication, ProductRoute)
-route.use('/cart', CartRoute)
 route.use('/store', Authentication , StoreRoute)
+route.use('/carts', Authentication, CartRoute)
 
 
 module.exports = route

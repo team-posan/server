@@ -28,7 +28,7 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.removeConstaint("Carts", "UserId", {});
-    await queryInterface.removeConstaint("Carts", "ProductId", {});
+    await queryInterface.removeConstaint("Carts", "add fk userid to carts", {});
+    await queryInterface.removeConstaint("Carts", "add fk product id to carts", {});
   },
 };

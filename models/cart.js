@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // Cart.hasMany(models.Product)
     }
   };
   Cart.init({
@@ -19,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
     quantity: DataTypes.INTEGER,
     payment_status: DataTypes.STRING
   }, {
+    hooks: {
+    },
     sequelize,
     modelName: 'Cart',
   });
