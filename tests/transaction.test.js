@@ -28,7 +28,7 @@ describe("test POST carts", () => {
         carts: [inputCartsSuccess]
       })
       .set("Accept", "application/json")
-      .set("access", access_token)
+      .set("access_token", access_token)
       .then((response) => {
         const { status, body } = response;
         // console.log('>>>>>', body);
@@ -46,11 +46,11 @@ describe("test POST carts", () => {
       .post("/carts")
       .send(inputCartsSuccess)
       .set("NotAccept", "application/json")
-      .set("access", 'invalid access token')
       .then((response) => {
         const { status, body } = response;
-        expect(status).toBe(401);
-        expect(body).toHaveProperty("message", "invalid access_token");
+        console.log(body)
+        expect(status).toBe(404);
+        expect(body).toHaveProperty("message", expect.any(String));
         done();
       });
   });
@@ -62,7 +62,7 @@ describe("Test GET carts", () => {
     request(app)
       .get("/carts")
       .set("Accept", "application/json")
-      .set("access", access_token)
+      .set("access_token", access_token)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
@@ -75,11 +75,11 @@ describe("Test GET carts", () => {
     request(app)
       .get("/carts")
       .set("NotAccept", "application/json")
-      .set("access", "okokokok")
+      // .set("access_token", "okokokok")
       .then((response) => {
         const { status, body } = response;
-        expect(status).toBe(401);
-        expect(body).toHaveProperty("message", "invalid access_token");
+        expect(status).toBe(404);
+        expect(body).toHaveProperty("message", expect.any(String));
         done();
       });
   });
@@ -106,11 +106,11 @@ describe("TEST UPDATE carts", () => {
       .put(`/carts/${id}`)
       .send(inputCartsSuccess)
       .set("Accept", "application/json")
-      .set("access", 'invalid access token')
+      // .set("access_token", 'invalid access token')
       .then((response) => {
         const { status, body } = response;
-        expect(status).toBe(401);
-        expect(body).toHaveProperty("message", "invalid access_token");
+        expect(status).toBe(404);
+        expect(body).toHaveProperty("message", expect.any(String));
         done();
       });
   });

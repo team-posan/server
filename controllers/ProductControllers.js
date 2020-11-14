@@ -2,7 +2,6 @@ const { Product } = require('../models')
 
 class ProductController {
 
-
     static getProductHandler(req,res,next){
         const { role } = req.userData
         if(role === 'admin'){
@@ -10,7 +9,7 @@ class ProductController {
                 order:[['id','asc'],['StoreId','asc']]
             })
                 .then(result=>{
-                    res.status(200).json({result})
+                    res.status(200).json(result)
                 })
                 .catch(err=>{
                     res.status(500).json({err})
@@ -21,7 +20,7 @@ class ProductController {
                 order:[['id','asc'],['StoreId','asc']]
             })
                 .then(result=>{
-                    res.status(200).json({result})
+                    res.status(200).json(result)
                 })
                 .catch(err=>{
                     res.status(500).json({err})
@@ -32,7 +31,7 @@ class ProductController {
                 order:[['id','asc'],['StoreId','asc']]
             })
                 .then(result=>{
-                    res.status(200).json({result})
+                    res.status(200).json(result)
                 })
                 .catch(err=>{
                     console.log(err)
@@ -67,7 +66,7 @@ class ProductController {
         } 
     }
 
-    static editProductHandler(req,res,next){
+    static async editProductHandler(req,res,next){
         const {product_name, price, image_url, stock } = req.body
         const id = req.params.id
         const { role } = req.userData
@@ -79,10 +78,18 @@ class ProductController {
             stock:+stock,
         }
 
+        const dataEdit = await Product.findOne({where:{id}})
+
+        if(!dataEdit) return res.status(404).json({message:'data not found'})
+
+        if(price < 0 || stock < 0){
+            return res.status(400).json({message:'stock or price cannont below 0'})
+        }
+
         if(role === 'admin'){
             Product.update(editedProduct, {where:{id}})
                 .then(result=>{
-                    res.status(201).json({result})
+                    res.status(201).json({result,message:`success edit product with id ${id}`})
                 })
                 .catch(err=>{
                     res.status(500).json({err})
