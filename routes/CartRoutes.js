@@ -4,7 +4,8 @@ const { CartController } = require('../controllers')
 route.get('/', CartController.getAll)
 route.post('/', CartController.addCart)
 route.put('/:id', CartController.editCart)
-route.patch('/:id', CartController.setPayment)
+route.patch('/', CartController.setPayment)
+route.delete('/:id', CartController.deleteCart)
 route.delete('/', CartController.bulkdeleteCart)
 
 

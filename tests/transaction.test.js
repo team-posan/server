@@ -5,16 +5,23 @@ const { queryInterface } = sequelize;
 const { signToken } = require("../helpers/jwt.js");
 const { User } = require('../models')
 
-let id = 1;
-var access_token_admin
-var access_token_kasir
-var access
+// let id = 1;
+// var access_token_admin
+// var access_token_kasir
+// var access
+let id
+let id2
+let id3
+var access_token_customer
+let access_token_kasir
+
 beforeAll(async (done)=>{
-  const admin = await User.findOne({where:{username:'admin'}})
+  const customer = await User.findOne({where:{phone_number:'081234567890'}})
   const kasir = await User.findOne({where:{username:'kasirjakarta'}})
-  access_token_admin = signToken({id:admin.id,username:admin.username,role:admin.role,StoreId:admin.StoreId})
+  access_token_customer = signToken({id:customer.id,role:customer.role, phone_number: customer.phone_number})
   access_token_kasir = signToken({id:kasir.id,username:kasir.username,role:kasir.role,StoreId:kasir.StoreId})
-  access = signToken({phone_number:'123456789', role:'customer', id:14})
+//   access = signToken({phone_number:'123456789', role:'customer', id:14})
+//   console.log('akses token', access_token_customer, access_token_kasir)
   done()
 })
 
@@ -38,20 +45,28 @@ describe("test POST carts", () => {
     request(app)
       .post("/carts")
       .send({
-        carts: [inputCartsSuccess]
+        carts: [inputCartsSuccess, inputCartsSuccess, inputCartsSuccess]
       })
       .set("Accept", "application/json")
-      .set("access", access)
+//       .set("access", access)
+      .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
-        // console.log('>>>>>', body);
+        id = body[0].id
+        id2 = body[1].id
+        id3 = body[2].id
+        console.log('>>>>> id baru', id, id2);
         expect(status).toBe(201);
         expect(body[0]).toHaveProperty("ProductId", expect.any(Number));
         // expect(body[0]).toHaveProperty("UserId", expect.any(Number)); // harunya return number dari db
         expect(body[0]).toHaveProperty("quantity", expect.any(Number));
         expect(body[0]).toHaveProperty("payment_status", expect.any(String));
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 
   test(`failed test post carts invalid access token `, (done) => {
@@ -65,7 +80,11 @@ describe("test POST carts", () => {
         expect(status).toBe(404);
         expect(body).toHaveProperty("message", expect.any(String));
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 });
 
@@ -75,13 +94,35 @@ describe("Test GET carts", () => {
     request(app)
       .get("/carts")
       .set("Accept", "application/json")
-      .set("access", access)
+//       .set("access", access)
+      .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
         expect(body).toHaveProperty("carts", expect.any(Object));
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
+  });
+
+  test(`success read all carts`, (done) => {
+    request(app)
+      .get("/carts")
+      .set("Accept", "application/json")
+      .set("access_token", access_token_customer)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("carts", expect.any(Object));
+        done();
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 
   test(`failed - invalid access token`, (done) => {
@@ -94,7 +135,11 @@ describe("Test GET carts", () => {
         expect(status).toBe(404);
         expect(body).toHaveProperty("message", expect.any(String));
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 });
 
@@ -105,13 +150,18 @@ describe("TEST UPDATE carts", () => {
       .put(`/carts/${id}`)
       .send(inputCartsSuccess)
       .set("Accept", "application/json")
-      .set("access", access)
+//       .set("access", access)
+      .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
         expect(body).toHaveProperty("message", "sucess updated data");
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 
   test("failed to update carts - invalid access token", (done) => {
@@ -125,21 +175,29 @@ describe("TEST UPDATE carts", () => {
         expect(status).toBe(404);
         expect(body).toHaveProperty("message", expect.any(String));
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 
   test("failed to update carts - data not found", (done) => {
     request(app)
       .put(`/carts/1000`)
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access", access_token_customer)
       .send(inputCartsSuccess)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(404);
         expect(body).toHaveProperty("message", "data not found");
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 });
 
@@ -148,53 +206,67 @@ describe("TEST UPDATE carts", () => {
 describe("TEST UPDATE PAYMENT carts", () => {
   let newPayment = {
     payment_status: 'paid',
-    dataId: [1, 2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
+    dataId: [id, id2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
   }
 
   test("success update carts", (done) => {
     request(app)
       .patch(`/carts`)
-      .send(newPayment)
+      .send({
+        payment_status: 'paid',
+        dataId: [id, id2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
+      })
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access_token", access_token_kasir)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
         expect(body).toHaveProperty("message", "sucess updated payment");
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log('error upadte payment', err)
+      //   done()
+      // })
   });
 
   test("failed to update payment carts - invalid access token", (done) => {
     request(app)
       .put(`/carts/${id}`)
-      .send(inputCartsSuccess)
+      .send({
+        payment_status: 'paid',
+        dataId: [id, id2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
+      })
       .set("Accept", "application/json")
-      // .set("access", 'invalid access token')
+      .set("access_token", 'invalid access token')
       .then((response) => {
         const { status, body } = response;
-        expect(status).toBe(401);
+        expect(status).toBe(403);
         expect(body).toHaveProperty("message", "invalid access_token");
         done();
-      });
+      })
+      // .catch(err=>{
+      //   console.log('error upadte payment', err)
+      //   done()
+      // })
   });
 
   test("failed to update payment carts - data not found", (done) => {
     request(app)
       .put(`/carts/1000`)
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
-      .send(inputCartsSuccess)
+      .set("access_token", access_token_kasir)
+      .send(newPayment)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(404);
         expect(body).toHaveProperty("message", "data not found");
         done();
       })
-      .catch(err=>{
-        console.log(err)
-        done()
-      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 });
 
@@ -206,42 +278,42 @@ describe("TEST DELETE carts", () => {
       .delete(`/carts/${id}`)
       .send(inputCartsSuccess)
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
         expect(body).toHaveProperty("message", "sucess deleted data");
         done();
       })
-      .catch(err=>{
-        console.log(err)
-        done()
-      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 
-  test("failed to delete carts - invalid number phone", (done) => {
-    request(app)
-      .delete(`/carts/${id}`)
-      .send(inputCartsSuccess)
-      .set("Accept", "application/json")
-      .set("access_token", 'invalid access token')
-      .then((response) => {
-        const { status, body } = response;
-        expect(status).toBe(401);
-        expect(body).toHaveProperty("message", "invalid access_token");
-        done();
-      })
-      .catch(err=>{
-        console.log(err)
-        done()
-      })
-  });
+  // test("failed to delete carts - invalid number phone", (done) => {
+  //   request(app)
+  //     .delete(`/carts/${id}`)
+  //     .send(inputCartsSuccess)
+  //     .set("Accept", "application/json")
+  //     .set("access", 'invalid access token')
+  //     .then((response) => {
+  //       const { status, body } = response;
+  //       expect(status).toBe(401);
+  //       expect(body).toHaveProperty("message", "invalid access_token");
+  //       done();
+  //     })
+  //     // .catch(err=>{
+  //     //   console.log(err)
+  //     //   done()
+  //     // })
+  // });
 
   test("failed to delete carts - data not found", (done) => {
     request(app)
       .delete(`/carts/1000`)
       .set("Accept", "application/json")
-      .set("access_token", access_token_admin)
+      .set("access", access_token_customer)
       .send(inputCartsSuccess)
       .then((response) => {
         const { status, body } = response;
@@ -249,23 +321,46 @@ describe("TEST DELETE carts", () => {
         expect(body).toHaveProperty("message", "data not found");
         done();
       })
-      .catch(err=>{
-        console.log(err)
-        done()
-      })
-    
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
   });
 });
 
 
-// afterAll((done) => {
-//   queryInterface
-//     .bulkDelete("Carts")
-//     .then(() => {
-//       done();
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       done();
-//     });
-// });
+// BULK DELETE
+describe("TEST DELETE carts", () => {
+  test("success bulk delete carts", (done) => {
+    request(app)
+      .delete(`/carts`)
+      .send({
+        idToDelete: [id2, id3]
+      })
+      .set("Accept", "application/json")
+      .set("access", access_token_customer)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("message", "success bulk delete");
+        done();
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
+  });
+});
+
+
+afterAll((done) => {
+  queryInterface
+    .bulkDelete("Carts")
+    .then(() => {
+      done();
+    })
+    .catch((err) => {
+      console.log(err);
+      done();
+    });
+});
