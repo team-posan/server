@@ -6,8 +6,12 @@ const Authentication=(req,res,next)=>{
     
     if(req.headers.access_token){
         console.log('headers.access_token')
-
-        decoded = verifyToken(req.headers.access_token)
+        // ! untuk mengatasi kalo akses token gak resmi
+        try {
+            decoded = verifyToken(req.headers.access_token)
+        } catch (error) {
+            return res.status(403).json({message: 'invalid access_token'})
+        }
     }else if(req.headers.access){
         // try {
             decoded = verifyToken(req.headers.access)
@@ -22,15 +26,17 @@ const Authentication=(req,res,next)=>{
         //     role: decoded.role,
         //     id: +decoded.id
         // }
+        console.log('masuk customer', decoded)
         req.userData = decoded
         return next()
     }else{
         res.status(404).json({message:'Login needed'})
     }
-    console.log(decoded)
+    console.log('+++++', decoded)
     // User.findOne({where:{username:decoded.username}})
     User.findOne({where:{id: +decoded.id}})
         .then(user=>{
+            console.log('dari authentication', user)
             if(!user){
                 res.status(404).json({message:'user not found'})
             }else{
