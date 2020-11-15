@@ -1,4 +1,5 @@
 const {Cart, Product} = require('../models')
+const cart = require('../models/cart')
 
 
 /**
@@ -107,8 +108,9 @@ class CartController {
       // })
    }
 
-   static setPayment (req, res, next) {
+   static async setPayment (req, res, next) {
       console.log('masuk setPayment', req.body.payment_status)
+
       Cart.update({
          payment_status: req.body.payment_status
       }, {
@@ -117,19 +119,24 @@ class CartController {
             id: req.body.dataId
          },
          returning: true
-      }).then((result) => {
+      }).then(async(result) => {
+         console.log('update payment', result[1])
+
          if (req.body.payment_status === 'paid') {
-            result.map(cart => {
-               Product.update({
-                  
-               },{
-                  where: {
-                     id: cart.ProductId
-                  }
-               })
+            result[1].map( async cart => {
+               try {
+                    await Product.decrement('stock',{
+                        by: cart.quantity,
+                        where: {
+                            id: cart.ProductId
+                        }
+                    })
+                    console.log('berhasi')
+                } catch (err) {
+                    console.log('dari loop decrement ke', cart.id , err)
+                }
             })
          }
-         console.log('update payment', result)
          if (result[0] === 0 ) {
             return res.status(404).json({
                message: 'data not found'
