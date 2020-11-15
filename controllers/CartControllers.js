@@ -1,4 +1,5 @@
-const {Cart} = require('../models')
+const {Cart, Product} = require('../models')
+
 
 /**
  * @userData didapat dari Authentication
@@ -17,7 +18,7 @@ class CartController {
          where: {
             UserId: req.userData.id
          },
-         // // include: ['Products']
+         include: [Product]
       }).then(data => {
          console.log(data)
          res.status(200).json({
@@ -25,6 +26,22 @@ class CartController {
          })
       })
    }
+
+   static getAllFromScan (req, res) {
+      console.log('===>', req.body.dataId)
+      Cart.findAll({
+         where: {
+            id: req.body.dataId
+         },
+         include: [Product]
+      }).then(data => {
+         console.log(data)
+         res.status(200).json({
+            carts: data
+         })
+      })
+   }
+   
 
    static addCart (req, res, next) {
       const { carts } = req.body
@@ -38,13 +55,21 @@ class CartController {
       console.log('???/ setelah di map', finalCartsData)
 
       try {
-         Cart.bulkCreate(finalCartsData,{
-            returning: true
+         Cart.bulkCreate(finalCartsData, {
+            include: [Product]
          })
          .then((data) => {
+            return Cart.findAll({
+               where: {
+                  UserId: req.userData.id,
+                  payment_status: 'unpaid'
+               },
+               include: [Product]
+            })
+         }).then ((data => {
             console.log(data)
             res.status(201).json(data)
-         })
+         }))
          // .catch(err => {
          //    console.log('dari cath err try add', err)
          //    res.status(401).json(err)
@@ -83,7 +108,7 @@ class CartController {
    }
 
    static setPayment (req, res, next) {
-      console.log('id yang mau dirubah', req.body.dataId)
+      console.log('masuk setPayment', req.body.payment_status)
       Cart.update({
          payment_status: req.body.payment_status
       }, {
@@ -93,6 +118,17 @@ class CartController {
          },
          returning: true
       }).then((result) => {
+         if (req.body.payment_status === 'paid') {
+            result.map(cart => {
+               Product.update({
+                  
+               },{
+                  where: {
+                     id: cart.ProductId
+                  }
+               })
+            })
+         }
          console.log('update payment', result)
          if (result[0] === 0 ) {
             return res.status(404).json({

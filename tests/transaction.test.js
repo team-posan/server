@@ -52,6 +52,7 @@ describe("test POST carts", () => {
       .set("access", access_token_customer)
       .then((response) => {
         const { status, body } = response;
+        console.log('masuk test post cart', body)
         id = body[0].id
         id2 = body[1].id
         id3 = body[2].id
@@ -77,7 +78,7 @@ describe("test POST carts", () => {
       .then((response) => {
         const { status, body } = response;
         console.log(body)
-        expect(status).toBe(404);
+        expect(status).toBe(403);
         expect(body).toHaveProperty("message", expect.any(String));
         done();
       })
@@ -96,6 +97,24 @@ describe("Test GET carts", () => {
       .set("Accept", "application/json")
 //       .set("access", access)
       .set("access", access_token_customer)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("carts", expect.any(Object));
+        done();
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
+  });
+
+  test(`success read all carts from scan`, (done) => {
+    request(app)
+      .post("/carts/scan")
+      .set("Accept", "application/json")
+//       .set("access", access)
+      .set("access", access_token_kasir)
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
@@ -132,7 +151,7 @@ describe("Test GET carts", () => {
       // .set("access_token", "okokokok")
       .then((response) => {
         const { status, body } = response;
-        expect(status).toBe(404);
+        expect(status).toBe(403);
         expect(body).toHaveProperty("message", expect.any(String));
         done();
       })
@@ -172,7 +191,7 @@ describe("TEST UPDATE carts", () => {
       // .set("access_token", 'invalid access token')
       .then((response) => {
         const { status, body } = response;
-        expect(status).toBe(404);
+        expect(status).toBe(403);
         expect(body).toHaveProperty("message", expect.any(String));
         done();
       })

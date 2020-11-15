@@ -31,6 +31,7 @@ beforeAll(async (done)=>{
     access_token_admin = signToken({id:admin.id,username:admin.username,role:admin.role,StoreId:admin.StoreId})
     access_token_kasir = signToken({id:kasir.id,username:kasir.username,role:kasir.role,StoreId:kasir.StoreId})
     access = signToken({phone_number:'123456789', role:'customer', id:14})
+    console.log('access token kasir', access_token_kasir, kasir)
     done()
  })
 
