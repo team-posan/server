@@ -1,4 +1,6 @@
-const {Cart} = require('../models')
+const {Cart, Product} = require('../models')
+const cart = require('../models/cart')
+
 
 /**
  * @userData didapat dari Authentication
@@ -17,7 +19,7 @@ class CartController {
          where: {
             UserId: req.userData.id
          },
-         // // include: ['Products']
+         include: [Product]
       }).then(data => {
          console.log(data)
          res.status(200).json({
@@ -25,6 +27,22 @@ class CartController {
          })
       })
    }
+
+   static getAllFromScan (req, res) {
+      console.log('===>', req.body.dataId)
+      Cart.findAll({
+         where: {
+            id: req.body.dataId
+         },
+         include: [Product]
+      }).then(data => {
+         console.log(data)
+         res.status(200).json({
+            carts: data
+         })
+      })
+   }
+   
 
    static addCart (req, res, next) {
       const { carts } = req.body
@@ -38,13 +56,21 @@ class CartController {
       console.log('???/ setelah di map', finalCartsData)
 
       try {
-         Cart.bulkCreate(finalCartsData,{
-            returning: true
+         Cart.bulkCreate(finalCartsData, {
+            include: [Product]
          })
          .then((data) => {
+            return Cart.findAll({
+               where: {
+                  UserId: req.userData.id,
+                  payment_status: 'unpaid'
+               },
+               include: [Product]
+            })
+         }).then ((data => {
             console.log(data)
             res.status(201).json(data)
-         })
+         }))
          // .catch(err => {
          //    console.log('dari cath err try add', err)
          //    res.status(401).json(err)
@@ -82,8 +108,9 @@ class CartController {
       // })
    }
 
-   static setPayment (req, res, next) {
-      console.log('id yang mau dirubah', req.body.dataId)
+   static async setPayment (req, res, next) {
+      console.log('masuk setPayment', req.body.payment_status)
+
       Cart.update({
          payment_status: req.body.payment_status
       }, {
@@ -92,8 +119,24 @@ class CartController {
             id: req.body.dataId
          },
          returning: true
-      }).then((result) => {
-         console.log('update payment', result)
+      }).then(async(result) => {
+         console.log('update payment', result[1])
+
+         if (req.body.payment_status === 'paid') {
+            result[1].map( async cart => {
+               try {
+                    await Product.decrement('stock',{
+                        by: cart.quantity,
+                        where: {
+                            id: cart.ProductId
+                        }
+                    })
+                    console.log('berhasi')
+                } catch (err) {
+                    console.log('dari loop decrement ke', cart.id , err)
+                }
+            })
+         }
          if (result[0] === 0 ) {
             return res.status(404).json({
                message: 'data not found'
