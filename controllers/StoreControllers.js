@@ -15,6 +15,7 @@ class StoreController{
 
     static async addStoreHandler(req,res,next){
         const { role } = req.userData
+        console.log(req.body)
         const { store_name, store_address } = req.body
         const newStore = {
             store_name, store_address

@@ -16,7 +16,7 @@ var access_token_customer
 let access_token_kasir
 
 beforeAll(async (done)=>{
-  const customer = await User.findOne({where:{phone_number:'081234567890'}})
+  const customer = await User.findOne({where:{phone_number:'123456789'}})
   const kasir = await User.findOne({where:{username:'kasirjakarta'}})
   access_token_customer = signToken({id:customer.id,role:customer.role, phone_number: customer.phone_number})
   access_token_kasir = signToken({id:kasir.id,username:kasir.username,role:kasir.role,StoreId:kasir.StoreId})
