@@ -15,20 +15,28 @@ const cart = require('../models/cart')
 
 class CartController {
    static getAll(req, res, next) {
-      Cart.findAll({
-         where: {
-            UserId: req.userData.id
-         },
-         include: [Product]
-      }).then(data => {
-         // console.log(data)
-         res.status(200).json({
-            carts: data
+      if (req.userData.role === 'admin') {
+         Cart.findAll({
+            include: [Product]
+         }).then(data => {
+            console.log('role admin', data)
+            res.status(200).json({
+               carts: data
+            })
          })
-      })
-      .catch(err=>{
-         console.log(err)
-      })
+      } else {
+         Cart.findAll({
+            where: {
+               UserId: req.userData.id
+            },
+            include: [Product]
+         }).then(data => {
+            console.log(data)
+            res.status(200).json({
+               carts: data
+            })
+         })
+      }
    }
 
    static getAllFromScan (req, res) {
