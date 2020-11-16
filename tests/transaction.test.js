@@ -111,7 +111,7 @@ describe("Test GET carts", () => {
 
   test(`success read all carts from barcode`, (done) => {
     request(app)
-      .post("/carts")
+      .post("/carts/scan")
       .set("Accept", "application/json")
 //       .set("access", access)
       .set("access_token", access_token_kasir)
@@ -120,6 +120,8 @@ describe("Test GET carts", () => {
       })
       .then((response) => {
         const { status, body } = response;
+        console.log(body)
+
         expect(status).toBe(200);
         expect(body).toHaveProperty("carts", expect.any(Object));
         done();
@@ -136,6 +138,9 @@ describe("Test GET carts", () => {
       .set("Accept", "application/json")
 //       .set("access", access)
       .set("access", access_token_kasir)
+      .send({
+        dataId: [id, id2] // diisi id cart
+      })
       .then((response) => {
         const { status, body } = response;
         expect(status).toBe(200);
@@ -155,14 +160,11 @@ describe("Test GET carts", () => {
       .set("access_token", access_token_customer)
       .then((response) => {
         const { status, body } = response;
+        console.log(body)
         expect(status).toBe(200);
         expect(body).toHaveProperty("carts", expect.any(Object));
         done();
       })
-      // .catch(err=>{
-      //   console.log(err)
-      //   done()
-      // })
   });
 
   test(`failed - invalid access token`, (done) => {
