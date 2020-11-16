@@ -23,10 +23,10 @@ class Midtrans {
 
     core.charge(parameter)
     .then((chargeResponse)=>{
-        console.log('chargeResponse:');
+        // console.log('chargeResponse:');
         // window.location=chargeResponse.actions[1].url
         res.send(chargeResponse.actions[1].url)
-        console.log(chargeResponse);
+        // console.log(chargeResponse);
     }).catch(err=>{
         console.log(err)
     })

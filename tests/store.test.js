@@ -67,7 +67,7 @@ describe('Testing Add Store', ()=>{
          .send(inputStore)
          .then(response => {
                const {status, body} = response
-               expect(status).toBe(404)
+               expect(status).toBe(403)
                expect(body).toHaveProperty('message', expect.any(String))
                done()
          })
@@ -88,7 +88,7 @@ describe('Testing Add Store', ()=>{
    })
 })
 
-describe('Testing Edit Product', ()=>{
+describe('Testing Edit Store', ()=>{
    const storeUpdateInput = {...inputStore,store_name:'surabaya 3'}
    describe('Testing Edit Store Success', ()=>{
       test("Success: Edit/Update One Data", done => {
@@ -115,7 +115,7 @@ describe('Testing Edit Product', ()=>{
          .send(storeUpdateInput)
          .then(response => {
                const {status, body} = response
-               expect(status).toBe(404)
+               expect(status).toBe(403)
                expect(body).toHaveProperty('message', expect.any(String))
                done()
          })

@@ -40,9 +40,14 @@ class UserController {
                 return res.status(201).json({access})
             }
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             return  res.status(500).json({error})
         }
+    }
+
+
+    static async getKasirHandler(req,res,next){
+        
     }
 
 
