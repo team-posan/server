@@ -109,6 +109,27 @@ describe("Test GET carts", () => {
       // })
   });
 
+  test(`success read all carts from barcode`, (done) => {
+    request(app)
+      .post("/carts")
+      .set("Accept", "application/json")
+//       .set("access", access)
+      .set("access_token", access_token_kasir)
+      .send({
+        dataId: [id, id2] // diisi id cart
+      })
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("carts", expect.any(Object));
+        done();
+      })
+      // .catch(err=>{
+      //   console.log(err)
+      //   done()
+      // })
+  });
+
   test(`success read all carts from scan`, (done) => {
     request(app)
       .post("/carts/scan")
@@ -233,6 +254,27 @@ describe("TEST UPDATE PAYMENT carts", () => {
       .patch(`/carts`)
       .send({
         payment_status: 'paid',
+        dataId: [id, id2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
+      })
+      .set("Accept", "application/json")
+      .set("access_token", access_token_kasir)
+      .then((response) => {
+        const { status, body } = response;
+        expect(status).toBe(200);
+        expect(body).toHaveProperty("message", "sucess updated payment");
+        done();
+      })
+      // .catch(err=>{
+      //   console.log('error upadte payment', err)
+      //   done()
+      // })
+  });
+
+  test("success update carts", (done) => {
+    request(app)
+      .patch(`/carts`)
+      .send({
+        payment_status: 'done',
         dataId: [id, id2] // diisi id cart yang akan diubah payment karena semua pembayaran jadi satu
       })
       .set("Accept", "application/json")

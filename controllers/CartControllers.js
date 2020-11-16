@@ -36,9 +36,17 @@ class CartController {
          },
          include: [Product]
       }).then(data => {
-         console.log(data)
-         res.status(200).json({
-            carts: data
+         const dataFresh = data.filter(cart => {
+            return cart.payment_status !== 'done'
+         })
+         if (dataFresh.length === 0) {
+            return res.status(404).json({
+               carts: [],
+               message: 'invalid barcode'
+            })
+         }
+         return res.status(200).json({
+            carts: dataFresh
          })
       })
    }
@@ -77,7 +85,6 @@ class CartController {
          // })
       } 
       catch (error) {
-         console.log('masuk sini erorr')
          res.status(500).json(error)
       }
    }
