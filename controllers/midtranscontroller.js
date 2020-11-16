@@ -58,9 +58,13 @@ class Midtrans {
             .then((chargeResponse) => {
                 // console.log('chargeResponse:');
                 // window.location=chargeResponse.actions[1].url
-                res.status(200).json(chargeResponse.actions[1].url)
-                // console.log(chargeResponse);
+                res.status(200).json({
+                    deeplinkUrl: chargeResponse.actions[1].url,
+                    statusUrl: chargeResponse.actions[2].url
+                })
+                console.log('woke', chargeResponse);
             }).catch(err => {
+                res.send(err)
                 console.log(err)
             })
     }
@@ -96,7 +100,7 @@ class Midtrans {
             })
             // redirect ke expo kalo udah dipasang di client
             // exp://192.168.1.10:19000
-            return res.redirect('https://www.google.com/')
+            return res.redirect('exp://192.168.43.12:19000')
             // return res.status(200).json({
             //     message: 'sucess updated payment',
             //     data: result
