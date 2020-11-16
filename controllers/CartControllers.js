@@ -79,20 +79,20 @@ class CartController {
             include: [Product]
          })
          .then((data) => {
-            res.status(201).json(data)
-
-            // return Cart.findAll({
-            //    where: {
-            //       UserId: req.userData.id,
-            //       payment_status: 'unpaid'
-            //    },
-            //    include: [Product]
-            // })
+            // console.log('>>>>>', data)
+            // res.status(201).json(data)
+            const idCreated = data.map(cart => cart.id)
+            return Cart.findAll({
+               where: {
+                  id: [idCreated]
+               },
+               include: [Product]
+            })
          })
-         // .then ((data => {
-         //    console.log(data)
-         //    res.status(201).json(data)
-         // }))
+         .then ((data => {
+            console.log(">>>>", data)
+            res.status(201).json(data)
+         }))
          // .catch(err => {
          //    console.log('dari cath err try add', err)
          //    res.status(401).json(err)
