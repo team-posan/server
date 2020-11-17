@@ -1,6 +1,14 @@
 const { User } = require('../models')
 const { comparePassword } = require('../helpers/bcrypt')
 const { signToken } = require('../helpers/jwt')
+const Nexmo = require("nexmo");
+
+const nexmo = new Nexmo({
+  apiKey: "8ad6132a",
+  apiSecret: "uFQDCcLWA3xh8Vo1",
+});
+
+
 
 class UserController {
     static adminLoginHandler(req,res,next){
@@ -27,14 +35,20 @@ class UserController {
         }
     }
 
-    static async customerLoginHandler(req,res,next){
+    static async customerLoginHandler(req, res, next) {
         const { phone_number } = req.body
+        var codeVerification = Math.floor(1000 + Math.random() * 9000);
+        let from = "POSAN Apps";
+        let to = phone_number;
+        let text = `Hello, this is your verification code ${codeVerification}`;
+     
         try {
             const checkCustomer = await User.findOne({where:{phone_number}})
             if(!checkCustomer){
                 let createCustomer = await  User.create({phone_number,role:'customer'})
-                const access = signToken({role:'customer',id:+createCustomer.id})
-                 return res.status(201).json({access})
+                const access = signToken({ role: 'customer', id: +createCustomer.id })
+                // nexmo.message.sendSms(from, to, text);
+                 return res.status(201).json({access, codeVerification})
             }else {
                 const access = signToken({role:'customer',id:+checkCustomer.id})
                 return res.status(201).json({access})
