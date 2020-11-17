@@ -220,3 +220,18 @@ describe('Testing Delete Kasir', ()=>{
         }) 
     })
 })
+
+describe('Get Kasir Testing', ()=>{
+    test('Get Kasir Success', (done)=>{
+        request(app)
+        .get("/user/getkasir")
+        .set("Accept", "application/json")
+        .set("access_token", access_token_admin)
+        .then((response) => {
+            const { status, body } = response;
+            expect(status).toBe(200);
+            expect(Array.isArray(body)).toBeTruthy();
+            done();
+        })  
+    })
+})

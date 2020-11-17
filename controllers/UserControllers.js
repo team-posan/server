@@ -54,8 +54,19 @@ class UserController {
                 return res.status(201).json({access})
             }
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             return  res.status(500).json({error})
+        }
+    }
+
+
+    static async getKasirHandler(req,res,next){
+        try {
+            const dataCustomer = await User.findAll({order:[['role','asc']]})
+            return res.status(200).json(dataCustomer)
+        }
+        catch (error){
+            return res.status(500).json(error)
         }
     }
 
@@ -84,6 +95,7 @@ class UserController {
     }
 
     static async editKasirHandler(req,res,next){
+        console.log('masukk')
         const { username, password,StoreId } = req.body
         const id = +req.params.id
         const roleReqData = req.userData

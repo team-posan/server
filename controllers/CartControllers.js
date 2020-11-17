@@ -15,30 +15,48 @@ const cart = require('../models/cart')
 
 class CartController {
    static getAll(req, res, next) {
-      Cart.findAll({
-         where: {
-            UserId: req.userData.id
-         },
-         include: [Product]
-      }).then(data => {
-         console.log(data)
-         res.status(200).json({
-            carts: data
+      if (req.userData.role === 'admin') {
+         Cart.findAll({
+            include: [Product]
+         }).then(data => {
+            res.status(200).json({
+               carts: data
+            })
          })
-      })
+      } else {
+         Cart.findAll({
+            where: {
+               UserId: req.userData.id
+            },
+            include: [Product]
+         }).then(data => {
+            console.log(data)
+            res.status(200).json({
+               carts: data
+            })
+         })
+      }
    }
 
    static getAllFromScan (req, res) {
-      console.log('===>', req.body.dataId)
+      // console.log('===>', req.body.dataId)
       Cart.findAll({
          where: {
             id: req.body.dataId
          },
          include: [Product]
       }).then(data => {
-         console.log(data)
-         res.status(200).json({
-            carts: data
+         const dataFresh = data.filter(cart => {
+            return cart.payment_status !== 'done'
+         })
+         if (dataFresh.length === 0) {
+            return res.status(404).json({
+               carts: [],
+               message: 'invalid barcode'
+            })
+         }
+         return res.status(200).json({
+            carts: dataFresh
          })
       })
    }
@@ -53,22 +71,26 @@ class CartController {
          return cart
       })
 
-      console.log('???/ setelah di map', finalCartsData)
+      // console.log('???/ setelah di map', finalCartsData)
 
       try {
          Cart.bulkCreate(finalCartsData, {
             include: [Product]
          })
          .then((data) => {
+            // console.log('>>>>>', data)
+            // res.status(201).json(data)
+            const idCreated = data.map(cart => cart.id)
+            console.log('idcreated', idCreated)
             return Cart.findAll({
                where: {
-                  UserId: req.userData.id,
-                  payment_status: 'unpaid'
+                  id: idCreated
                },
                include: [Product]
             })
-         }).then ((data => {
-            console.log(data)
+         })
+         .then ((data => {
+            console.log(">>>>", data)
             res.status(201).json(data)
          }))
          // .catch(err => {
@@ -77,13 +99,12 @@ class CartController {
          // })
       } 
       catch (error) {
-         console.log('masuk sini erorr')
          res.status(500).json(error)
       }
    }
 
    static editCart (req, res, next) {
-      console.log('dari update', req.params.id)
+      // console.log('dari update', req.params.id)
       Cart.update({
          ProductId: req.body.ProductId,
          quantity: req.body.quantity
@@ -91,7 +112,7 @@ class CartController {
          where: {id: req.params.id},
          returning: true
       }).then((data) => {
-         console.log('dari edit data', data)
+         // console.log('dari edit data', data)
          if (data[0] === 0) {
             return res.status(404).json({
                message: 'data not found'
@@ -109,7 +130,7 @@ class CartController {
    }
 
    static async setPayment (req, res, next) {
-      console.log('masuk setPayment', req.body.payment_status)
+      // console.log('masuk setPayment', req.body.payment_status)
 
       Cart.update({
          payment_status: req.body.payment_status
@@ -120,7 +141,7 @@ class CartController {
          },
          returning: true
       }).then(async(result) => {
-         console.log('update payment', result[1])
+         // console.log('update payment', result[1])
 
          if (req.body.payment_status === 'paid') {
             result[1].map( async cart => {
@@ -131,9 +152,11 @@ class CartController {
                             id: cart.ProductId
                         }
                     })
-                    console.log('berhasi')
+                  //   console.log('berhasi')
                 } catch (err) {
-                    console.log('dari loop decrement ke', cart.id , err)
+                  //   console.log('dari loop decrement ke', cart.id , err)
+                    res.status(500).json({err})
+
                 }
             })
          }
@@ -154,14 +177,14 @@ class CartController {
    }
 
    static deleteCart (req, res, next) {
-      console.log('masuk sini')
+      // console.log('masuk sini')
       const { id } = req.params
       Cart.destroy({
          where: {
             id: id
          }
       }).then((result) => {
-         console.log('result delete', result)
+         // console.log('result delete', result)
          if (result === 0) {
             return res.status(404).json({
                message: 'data not found'

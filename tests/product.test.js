@@ -110,7 +110,6 @@ describe('Testing Fetch Product',()=>{
             .then((response) => {
                 const { status, body } = response;
                 expect(status).toBe(200);
-                console.log(body)
                 expect(Array.isArray(body)).toBeTruthy();
                 done();
             })
@@ -124,7 +123,6 @@ describe('Testing Fetch Product',()=>{
       .then((response) => {
           const { status, body } = response;
           expect(status).toBe(200);
-          console.log(body)
           expect(Array.isArray(body)).toBeTruthy();
           done();
       })
@@ -176,7 +174,7 @@ describe('Testing Add Product', ()=>{
          .send(productInput)
          .then(response => {
                const {status, body} = response
-               expect(status).toBe(404)
+               expect(status).toBe(403)
                expect(body).toHaveProperty('message', expect.any(String))
                done()
          })
@@ -209,7 +207,6 @@ describe('Testing Edit Product', ()=>{
             .then(response => {
                const {status, body} = response
                expect(status).toBe(201)
-               console.log(body)
                expect(body).toHaveProperty('message', expect.any(String))
                // expect(body).toHaveProperty('product_number', expect.any(Number))
                // expect(body).toHaveProperty('product_name', expect.any(String))
@@ -230,7 +227,7 @@ describe('Testing Edit Product', ()=>{
          .send(productUpdateInput)
          .then(response => {
                const {status, body} = response
-               expect(status).toBe(404)
+               expect(status).toBe(403)
                expect(body).toHaveProperty('message', expect.any(String))
                done()
          })
@@ -243,7 +240,6 @@ describe('Testing Edit Product', ()=>{
          .send(productUpdateInput)
          .then(response => {
                const {status, body} = response
-               console.log(body)
                expect(status).toBe(401)
                expect(body).toHaveProperty('message', expect.any(String))
                done()
