@@ -65,7 +65,7 @@ class CartController {
 
    static addCart (req, res, next) {
       const { carts } = req.body
-      // console.log('???/', carts)
+      console.log('???/', carts)
 
       let finalCartsData = carts.map(cart => {
          cart.UserId = req.userData.id
@@ -82,9 +82,10 @@ class CartController {
             // console.log('>>>>>', data)
             // res.status(201).json(data)
             const idCreated = data.map(cart => cart.id)
+            console.log('idcreated', idCreated)
             return Cart.findAll({
                where: {
-                  id: [idCreated]
+                  id: idCreated
                },
                include: [Product]
             })
