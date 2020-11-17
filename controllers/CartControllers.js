@@ -19,7 +19,6 @@ class CartController {
          Cart.findAll({
             include: [Product]
          }).then(data => {
-            console.log('role admin', data)
             res.status(200).json({
                carts: data
             })
@@ -155,7 +154,9 @@ class CartController {
                     })
                   //   console.log('berhasi')
                 } catch (err) {
-                    console.log('dari loop decrement ke', cart.id , err)
+                  //   console.log('dari loop decrement ke', cart.id , err)
+                    res.status(500).json({err})
+
                 }
             })
          }
