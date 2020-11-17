@@ -1,12 +1,12 @@
 const midtransClient = require('midtrans-client');
 const { verifyToken, signToken } = require('../helpers/jwt');
 const { Cart, Product } = require('../models')
-const linkServer = process.env.SERVERURL || 'http://localhost:5000'
+const linkServer = 'http://10.0.2.2:5000'
 
 let core = new midtransClient.CoreApi({
     isProduction: false,
-    serverKey: 'SB-Mid-server-gfcyFpC0-y7PzOahToSkk4yL',
-    clientKey: 'SB-Mid-client-PpcZqss1S3SMV-UI'
+    serverKey: 'SB-Mid-server-4B4yXVIv1C80XmqtjbePLmAM',
+    clientKey: 'SB-Mid-client-M7Bg5PAYXNuWbEUh'
 });
 
 /**
@@ -70,43 +70,77 @@ class Midtrans {
     }
 
     static verifyPaymentCart(req, res, next) {
-        const { pay } = req.query
-        const decodePay = verifyToken(pay)
-        let { data_id } = decodePay
-        console.log('verifyPaymentCart', data_id)
-        /**
-         * @data_id = [1, 2, 3, 4]
-         */
-        Cart.update({
-            payment_status: 'paid'
-        }, {
-            where: {
-                id: data_id
-            },
-            returning: true
-        }).then(async (result) => {
-            result[1].map(async cart => {
-                try {
-                    await Product.decrement('stock', {
-                        by: cart.quantity,
-                        where: {
-                            id: cart.ProductId
-                        }
-                    })
-                    //   console.log('berhasi')
-                } catch (err) {
-                    console.log('dari loop decrement ke', cart.id, err)
-                }
-            })
-            // redirect ke expo kalo udah dipasang di client
-            // exp://192.168.1.10:19000
-            return res.redirect('exp://192.168.43.12:19000')
-            // return res.status(200).json({
-            //     message: 'sucess updated payment',
-            //     data: result
-            // })
-        })
+        // const { pay } = req.query
+        // const decodePay = verifyToken(pay)
+        // let { data_id } = decodePay
+        // console.log('verifyPaymentCart', data_id)
+        // /**
+        //  * @data_id = [1, 2, 3, 4]
+        //  */
+        // Cart.update({
+        //     payment_status: 'paid'
+        // }, {
+        //     where: {
+        //         id: data_id
+        //     },
+        //     returning: true
+        // }).then(async (result) => {
+        //     result[1].map(async cart => {
+        //         try {
+        //             await Product.decrement('stock', {
+        //                 by: cart.quantity,
+        //                 where: {
+        //                     id: cart.ProductId
+        //                 }
+        //             })
+        //             //   console.log('berhasi')
+        //         } catch (err) {
+        //             console.log('dari loop decrement ke', cart.id, err)
+        //         }
+        //     })
+        //     // redirect ke expo kalo udah dipasang di client
+        //     // exp://192.168.1.10:19000
+            return res.redirect('exp://192.168.1.10:19000')
+        //     // return res.status(200).json({
+        //     //     message: 'sucess updated payment',
+        //     //     data: result
+        //     // })
+        // })
+    }
 
+    static checkStatus(req,res){
+        console.log(req.body,'webhook')
+        const {transaction_status, order_id} = req.body
+        let updateId = order_id.split(',')
+        updateId = updateId.map((val=>{return parseInt(val)}))
+        if(transaction_status === 'settlement'){
+            Cart.update({
+                        payment_status: 'paid'
+                    }, {
+                        where: {
+                            id: updateId
+                        },
+                        returning: true
+                    }).then(async (result) => {
+                        result[1].map(async cart => {
+                            try {
+                                await Product.decrement('stock', {
+                                    by: cart.quantity,
+                                    where: {
+                                        id: cart.ProductId
+                                    }
+                                })
+                                  console.log('berhasil')
+                            } catch (err) {
+                                console.log('dari loop decrement ke', cart.id, err)
+                            }
+                        })
+             }) 
+        }
+    }
+
+    static failure(req,res){
+        return res.redirect('exp://192.168.1.10:19000/failure')
     }
 }
 
