@@ -35,7 +35,7 @@ class Midtrans {
         const decodePay = verifyToken(pay)
         const { amount, data_id } = decodePay
         
-        console.log('dari Midtrans', amount, data_id)
+        // console.log('dari Midtrans', amount, data_id)
         // const filteredOrderId = order_id.split('POSAN')[1]
         // console.log('filteredOrderId', filteredOrderId)
         const newPayCode = signToken({data_id: data_id})
@@ -62,10 +62,10 @@ class Midtrans {
                     deeplinkUrl: chargeResponse.actions[1].url,
                     statusUrl: chargeResponse.actions[2].url
                 })
-                console.log('woke', chargeResponse);
+                // console.log('woke', chargeResponse);
             }).catch(err => {
                 res.send(err)
-                console.log(err)
+                // console.log(err)
             })
     }
 
@@ -130,18 +130,21 @@ class Midtrans {
                                         id: cart.ProductId
                                     }
                                 })
-                                  console.log('berhasil')
+                                //   console.log('berhasil')
+                                res.status(201).json({message:'berhasil'})
                             } catch (err) {
-                                console.log('dari loop decrement ke', cart.id, err)
+                                // console.log('dari loop decrement ke', cart.id, err)
+                                console.log(err,' error checkstatus')
+                                res.status(500).json({err})
                             }
                         })
              }) 
         }
     }
 
-    static failure(req,res){
-        return res.redirect('exp://192.168.1.10:19000/failure')
-    }
+    // static failure(req,res){
+    //     return res.redirect('exp://192.168.1.10:19000/failure')
+    // }
 }
 
 module.exports = Midtrans
