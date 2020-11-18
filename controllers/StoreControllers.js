@@ -9,6 +9,7 @@ class StoreController{
             return res.status(200).json(allStore)
 
         } catch (error) {
+            /* istanbul ignore next */
             return res.status(500).json({error})
         }
     }
@@ -51,6 +52,7 @@ class StoreController{
 
             }
         } catch (error) {
+            /* istanbul ignore next */
             return res.status(500).json({error})
         }
 
@@ -67,6 +69,7 @@ class StoreController{
                 return res.status(401).json({message:'not authorized to delete store'})
             }
         } catch (error) {
+            /* istanbul ignore next */
             return res.status(500).json({error})
         }
     }

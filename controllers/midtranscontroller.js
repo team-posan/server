@@ -30,7 +30,8 @@ let core = new midtransClient.CoreApi({
  */
 
 class Midtrans {
-    static getToken(req, res, next) {
+    /* istanbul ignore next */
+    static getToken (req, res, next) {
         const { pay } = req.query
         const decodePay = verifyToken(pay)
         const { amount, data_id } = decodePay
@@ -50,7 +51,8 @@ class Midtrans {
                 "enable_callback": true,                // optional
                 // "callback_url": "exp://192.168.1.10:19000"   // optional
                 // mengarah ke endpoint verifyPaymentCart
-                "callback_url": `${linkServer}/midtrans/verify?pay=${newPayCode}`   // optional
+                // "callback_url": `${linkServer}/midtrans/verify?pay=${newPayCode}`   // optional
+                "callback_url":"exp://192.168.1.10:19000"
             }
         };
 
@@ -58,12 +60,14 @@ class Midtrans {
             .then((chargeResponse) => {
                 // console.log('chargeResponse:');
                 // window.location=chargeResponse.actions[1].url
+                /* istanbul ignore next */
                 res.status(200).json({
                     deeplinkUrl: chargeResponse.actions[1].url,
                     statusUrl: chargeResponse.actions[2].url
                 })
                 // console.log('woke', chargeResponse);
             }).catch(err => {
+                /* istanbul ignore next */
                 res.send(err)
                 // console.log(err)
             })
@@ -100,7 +104,7 @@ class Midtrans {
         //     })
         //     // redirect ke expo kalo udah dipasang di client
         //     // exp://192.168.1.10:19000
-            return res.redirect('exp://192.168.1.10:19000')
+            // return res.redirect('exp://192.168.1.10:19000')
         //     // return res.status(200).json({
         //     //     message: 'sucess updated payment',
         //     //     data: result
