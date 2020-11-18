@@ -4,8 +4,11 @@ const { signToken } = require('../helpers/jwt')
 const Nexmo = require("nexmo");
 
 const nexmo = new Nexmo({
-  apiKey: "8ad6132a",
-  apiSecret: "uFQDCcLWA3xh8Vo1",
+//   apiKey: "8ad6132a",
+//   apiSecret: "uFQDCcLWA3xh8Vo1",
+    apiKey: "346b7003",
+    apiSecret: "kSUf12vN593T8RjG",
+        
 });
 
 
@@ -41,13 +44,14 @@ class UserController {
         let from = "POSAN Apps";
         let to = phone_number;
         let text = `Hello, this is your verification code ${codeVerification}`;
-     
+        
         try {
             const checkCustomer = await User.findOne({where:{phone_number}})
+            // console.log('masuk', checkCustomer)
             if(!checkCustomer){
                 let createCustomer = await  User.create({phone_number,role:'customer'})
                 const access = signToken({ role: 'customer', id: +createCustomer.id })
-                // nexmo.message.sendSms(from, to, text);
+                nexmo.message.sendSms(from, to, text);
                  return res.status(201).json({access, codeVerification})
             }else {
                 const access = signToken({role:'customer',id:+checkCustomer.id})

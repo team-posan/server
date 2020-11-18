@@ -12,6 +12,7 @@ class ProductController {
                     return res.status(200).json(result)
                 })
                 .catch(err=>{
+                    /* istanbul ignore next */
                     return res.status(500).json({err})
                 })
         }else if(role === 'kasir'){
@@ -23,6 +24,7 @@ class ProductController {
                     return res.status(200).json(result)
                 })
                 .catch(err=>{
+                    /* istanbul ignore next */
                     return res.status(500).json({err})
                 })
         }else{
@@ -34,6 +36,7 @@ class ProductController {
                     return res.status(200).json(result)
                 })
                 .catch(err=>{
+                    /* istanbul ignore next */
                     return res.status(500).json({err})
                 })
         }
@@ -58,6 +61,7 @@ class ProductController {
                     res.status(201).json(result)
                 })
                 .catch(err=>{
+                    /* istanbul ignore next */
                     res.status(500).json({err})
                 })
         }else{
@@ -91,6 +95,7 @@ class ProductController {
                     res.status(201).json({result,message:`success edit product with id ${id}`})
                 })
                 .catch(err=>{
+                    /* istanbul ignore next */
                     res.status(500).json({err})
                 })
                 
@@ -110,6 +115,7 @@ class ProductController {
                 res.status(401).json({message:'Unauthorized to delete product only admin authorized to add product'})
             }
         } catch (error) {
+            /* istanbul ignore next */
             res.status(500).json({error})
         }
       
